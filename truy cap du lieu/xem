@@ -1,0 +1,30 @@
+import mysql.connector
+
+# Kết nối đến cơ sở dữ liệu
+mydb = mysql.connector.connect(
+    host="127.0.0.1",
+    user="root",
+    password="SQLdat1502:3",
+    database="new_database"
+)
+
+mycursor = mydb.cursor()
+
+# Nhập ID cây lan từ người dùng
+id_can_tim = input("Nhập ID cây lan bạn muốn tìm: ")
+
+# Truy vấn dữ liệu dựa trên ID
+sql = "SELECT * FROM new_database.caylan WHERE hoalan_id = %s"
+val = (id_can_tim,)
+mycursor.execute(sql, val)
+
+# Hiển thị kết quả
+myresult = mycursor.fetchall()
+
+if myresult:
+    for x in myresult:
+        print(x)
+else:
+    print("Không tìm thấy cây lan có ID này.")
+
+mydb.close()

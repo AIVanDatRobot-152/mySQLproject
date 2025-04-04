@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truy xuất và phát âm thanh</title>
+</head>
+<body>
+    <h1>Truy xuất và phát âm thanh từ MySQL</h1>
+    <form id="audioForm">
+        <label for="audio_id">Nhập ID âm thanh:</label>
+        <input type="text" id="audio_id" name="audio_id" required>
+        <button type="button" onclick="playAudio()">Phát âm thanh</button>
+    </form>
+    <audio id="audioPlayer" controls style="display:none;">
+        <source id="audioSource" type="audio/mpeg">
+        Trình duyệt của bạn không hỗ trợ thẻ audio.
+    </audio>
+
+    <script>
+        function playAudio() {
+            const audio_id = document.getElementById("audio_id").value;
+            fetch('/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'audio_id=' + audio_id,
+            }).then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    alert("Không tìm thấy âm thanh với ID đã nhập");
+                    throw new Error("Network response was not ok");
+                }
+            }).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const audioPlayer = document.getElementById("audioPlayer");
+                const audioSource = document.getElementById("audioSource");
+                audioSource.src = url;
+                audioPlayer.load();
+                audioPlayer.style.display = 'block';
+                audioPlayer.play();
+            }).catch(error => {
+                console.error("There was a problem with the fetch operation:", error);
+            });
+        }
+    </script>
+</body>
+</html>

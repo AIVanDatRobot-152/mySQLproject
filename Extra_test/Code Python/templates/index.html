@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Nguyen Van Dat - Media Player</title>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h2>Tìm kiếm Nhạc</h2>
+            <input type="text" id="musicSearch" placeholder="Tìm kiếm nhạc...">
+            <button onclick="loadMusic()">Tải danh sách nhạc</button>
+            <table id="musicTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Bài Hát</th>
+                        <th>Nghệ Sĩ</th>
+                        <th>Album</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button onclick="playSelectedMusic()">Phát Nhạc</button>
+        </div>
+        <div class="right-panel">
+            <h2>Tìm kiếm Video</h2>
+            <input type="text" id="videoSearch" placeholder="Tìm kiếm video...">
+            <button onclick="loadVideo()">Tải danh sách video</button>
+            <table id="videoTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Phim</th>
+                        <th>Đạo Diễn</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button onclick="playSelectedVideo()">Phát Video</button>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function loadMusic() {
+            const searchValue = $('#musicSearch').val();
+            $.getJSON(`/query_music?search_value=${searchValue}`, function(data) {
+                const musicTableBody = $('#musicTable tbody');
+                musicTableBody.empty();
+                data.forEach(song => {
+                    musicTableBody.append(`
+                        <tr data-id="${song[0]}">
+                            <td>${song[0]}</td>
+                            <td>${song[1]}</td>
+                            <td>${song[2]}</td>
+                            <td>${song[3]}</td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        function playSelectedMusic() {
+            const selectedRow = $('#musicTable tbody tr.selected');
+            if (selectedRow.length) {
+                const songId = selectedRow.data('id');
+                $.get(`/play_music/${songId}`);
+            } else {
+                alert("Vui lòng chọn một bài hát để phát.");
+            }
+        }
+
+        function loadVideo() {
+            const searchValue = $('#videoSearch').val();
+            $.getJSON(`/query_video?search_value=${searchValue}`, function(data) {
+                const videoTableBody = $('#videoTable tbody');
+                videoTableBody.empty();
+                data.forEach(movie => {
+                    videoTableBody.append(`
+                        <tr data-id="${movie[0]}">
+                            <td>${movie[0]}</td>
+                            <td>${movie[1]}</td>
+                            <td>${movie[2]}</td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        function playSelectedVideo() {
+            const selectedRow = $('#videoTable tbody tr.selected');
+            if (selectedRow.length) {
+                const movieId = selectedRow.data('id');
+                $.get(`/play_video/${movieId}`);
+            } else {
+                alert("Vui lòng chọn một video để phát.");
+            }
+        }
+
+        $(document).on('click', '#musicTable tbody tr, #videoTable tbody tr', function() {
+            $(this).toggleClass('selected').siblings().removeClass('selected');
+        });
+    </script>
+</body>
+</html>

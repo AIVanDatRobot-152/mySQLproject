@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 1.1em;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        audio {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Music Player</h1>
+        <form id="audioForm">
+            <label for="audio_id">Enter Music ID:</label>
+            <input type="text" id="audio_id" name="audio_id" placeholder="Enter ID" required>
+            <button type="button" onclick="playAudio()">Play Music</button>
+        </form>
+
+        <audio id="audioPlayer" controls style="display:none;">
+            <source id="audioSource" type="audio/mpeg">
+            Your browser does not support the audio tag.
+        </audio>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        function playAudio() {
+            const audio_id = document.getElementById("audio_id").value;
+            const errorDiv = document.getElementById("error");
+
+            fetch('/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'audio_id=' + audio_id,
+            }).then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    errorDiv.textContent = "Music not found for the entered ID.";
+                    throw new Error("Network response was not ok");
+                }
+            }).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const audioPlayer = document.getElementById("audioPlayer");
+                const audioSource = document.getElementById("audioSource");
+                audioSource.src = url;
+                audioPlayer.load();
+                audioPlayer.style.display = 'block';
+                audioPlayer.play();
+                errorDiv.textContent = "";  // Clear any previous error message
+            }).catch(error => {
+                console.error("There was a problem with the fetch operation:", error);
+            });
+        }
+    </script>
+</body>
+</html>
